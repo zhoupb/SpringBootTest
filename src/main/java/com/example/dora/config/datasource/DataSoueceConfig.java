@@ -34,37 +34,39 @@ public class DataSoueceConfig {
     @Value("${spring.datasource.primary.type}")
     private Class<? extends DataSource> meType;
 
-    @Value("${spring.datasource.secondary.type}")
-    private Class<? extends DataSource> syjType;
+//    @Value("${spring.datasource.secondary.type}")
+//    private Class<? extends DataSource> syjType;
 
     @Bean(name = "zhoupb")
     @ConfigurationProperties(prefix = "spring.datasource.primary")
-    public DataSource getDataSource(){
+    public DataSource getDataSource() {
         log.info("配置me数据源start");
         DataSource build = DataSourceBuilder.create().type(meType).build();
         log.info("配置me数据源end");
         return build;
     }
-    @Bean(name = "syj")
-    @ConfigurationProperties(prefix="spring.datasource.secondary")
-    public DataSource secondaryDataSource() {
-        log.info("配置syj数据源start");
-        DataSource build = DataSourceBuilder.create().type(syjType).build();
-        log.info("配置syj数据源end");
-        return build;
-    }
+//    @Bean(name = "syj")
+//    @ConfigurationProperties(prefix="spring.datasource.secondary")
+//    public DataSource secondaryDataSource() {
+//        log.info("配置syj数据源start");
+//        DataSource build = DataSourceBuilder.create().type(syjType).build();
+//        log.info("配置syj数据源end");
+//        return build;
+//    }
 
     /**
      * 动态数据源配置
+     *
      * @return
      */
     @Bean
     @Primary
-    public DataSource multipleDataSource(@Qualifier("zhoupb") DataSource zhoupb, @Qualifier("syj") DataSource syj) {
+//    public DataSource multipleDataSource(@Qualifier("zhoupb") DataSource zhoupb, @Qualifier("syj") DataSource syj) {
+    public DataSource multipleDataSource(@Qualifier("zhoupb") DataSource zhoupb) {
         DynamicDataSource dynamicDataSource = new DynamicDataSource();
-        Map< Object, Object > targetDataSources = new HashMap<>(4);
+        Map<Object, Object> targetDataSources = new HashMap<>(4);
         targetDataSources.put(DataSourceName.ZHOUPB.getValue(), zhoupb);
-        targetDataSources.put(DataSourceName.SYJ.getValue(), syj);
+//        targetDataSources.put(DataSourceName.SYJ.getValue(), syj);
         //添加数据源
         dynamicDataSource.setTargetDataSources(targetDataSources);
         //设置默认数据源
@@ -76,8 +78,8 @@ public class DataSoueceConfig {
     @Bean("sqlSessionFactory")
     public SqlSessionFactory sqlSessionFactory() throws Exception {
         MybatisSqlSessionFactoryBean sqlSessionFactory = new MybatisSqlSessionFactoryBean();
-        sqlSessionFactory.setDataSource(multipleDataSource(getDataSource(),secondaryDataSource()));
-
+//        sqlSessionFactory.setDataSource(multipleDataSource(getDataSource(),secondaryDataSource()));
+        sqlSessionFactory.setDataSource(multipleDataSource(getDataSource()));
         MybatisConfiguration configuration = new MybatisConfiguration();
         configuration.setJdbcTypeForNull(JdbcType.NULL);
         configuration.setMapUnderscoreToCamelCase(true);
@@ -92,10 +94,10 @@ public class DataSoueceConfig {
         return sqlSessionFactory.getObject();
     }
 
-    public GlobalConfig globalConfig(){
+    public GlobalConfig globalConfig() {
         GlobalConfig globalConfig = new GlobalConfig();
         GlobalConfig.DbConfig dbConfig = new GlobalConfig.DbConfig();
-        dbConfig.setTablePrefix("tbl_");
+//        dbConfig.setTablePrefix("tbl_");
         globalConfig.setDbConfig(dbConfig);
         return globalConfig;
     }
